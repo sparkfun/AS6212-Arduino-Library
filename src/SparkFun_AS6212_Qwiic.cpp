@@ -53,7 +53,8 @@ AS6212::AS6212()
   Returns True if checks pass.
  */
 
-bool AS6212::begin(uint8_t sensorAddress, TwoWire &wirePort){
+bool AS6212::begin(uint8_t sensorAddress, TwoWire &wirePort)
+{
   _i2cPort = &wirePort;
   _deviceAddress = sensorAddress;
 
@@ -68,14 +69,13 @@ bool AS6212::begin(uint8_t sensorAddress, TwoWire &wirePort){
   }
 }
 
-uint8_t AS6212::getAddress(){
-
+uint8_t AS6212::getAddress()
+{
   return _deviceAddress;
-  
 }
 
-uint16_t AS6212::readRegister(uint8_t reg, uint8_t size){
-
+uint16_t AS6212::readRegister(uint8_t reg, uint8_t size)
+{
   _i2cPort->beginTransmission(_deviceAddress);
   _i2cPort->write(reg);
   _i2cPort->endTransmission();
@@ -86,7 +86,8 @@ uint16_t AS6212::readRegister(uint8_t reg, uint8_t size){
   
   int16_t datac = 0;
 
-  if(_i2cPort->available() <= 2){
+  if(_i2cPort->available() <= 2)
+  {
     for(size_t i = 0; i < size; i++) dataBuffer[i] = _i2cPort->read();
   }
   
@@ -95,27 +96,29 @@ uint16_t AS6212::readRegister(uint8_t reg, uint8_t size){
   return datac;
 }
 
-void AS6212::writeRegister(uint8_t reg, int16_t data){
-
+void AS6212::writeRegister(uint8_t reg, int16_t data)
+{
   _i2cPort->beginTransmission(_deviceAddress);
   _i2cPort->write(reg);
   _i2cPort->write(highByte(data));
   _i2cPort->write(lowByte(data));
   _i2cPort->endTransmission();
-
 }
 
-float AS6212::readTempC(){
+float AS6212::readTempC()
+{
 
   int16_t digitalTempC = readRegister(TVAL,2);
 
   float finalTempC;
 
-  if(digitalTempC < 32768){
+  if(digitalTempC < 32768)
+  {
     finalTempC = digitalTempC * 0.0078125;
   }
 
-  if(digitalTempC >= 32768){
+  if(digitalTempC >= 32768)
+  {
     finalTempC = ((digitalTempC - 1) * 0.0078125) * -1;
   }
 
@@ -127,7 +130,8 @@ float AS6212::readTempF()
   return C_to_F( readTempC() ); 
 }
 
-float AS6212::getTLowC(){
+float AS6212::getTLowC()
+{
 	int16_t lowTemp = readRegister(TLOW,2);
 	
 	float temp;
@@ -180,7 +184,7 @@ float AS6212::getTHighC()
 	if(highTemp >= 32768){
 		temp = ((highTemp - 1) * 0.0078125) * -1;
 	}
-	
+
 	return temp;
 }
 
@@ -189,12 +193,11 @@ float AS6212::getTHighF()
   return C_to_F(getTHighC());
 }
 
-bool AS6212::setTHighC(int16_t highLimit){
-	
+bool AS6212::setTHighC(int16_t highLimit)
+{
 		int16_t highTemp = highLimit / 0.0078125;
 		writeRegister(THIGH, highTemp);
 		return true;
-
 }
 
 bool AS6212::setTHighF(int16_t highLimit)
@@ -204,26 +207,25 @@ bool AS6212::setTHighF(int16_t highLimit)
   return setTHighC(int16_t(temp_float)); // cast back to int16_t, set with C value & function
 }
 
-uint16_t AS6212::readConfig(){
-	
+uint16_t AS6212::readConfig()
+{
 		return readRegister(CONFIG,2);
-	
 }
 
-void AS6212::setConfig(uint16_t targetState){
-		
+void AS6212::setConfig(uint16_t targetState)
+{
 		writeRegister(CONFIG, targetState);
-		
 }
 
 
-/* readAlert
+/* getAlertStatus
 * returns the alert bit status as a boolean
 */
 
-bool AS6212::readAlert(){
+bool AS6212::getAlertStatus()
+{
     uint16_t configReg = readRegister(CONFIG,2);
-    return bitRead(configReg, 5);		
+    return bitRead(configReg, AS6212_CONFIG_BIT_ALERT);		
 }
 
 /* setConsecutiveFaults
@@ -232,8 +234,8 @@ bool AS6212::readAlert(){
 *  in the configuration register bits 11 and 12.
 */
 
-void AS6212::setConsecutiveFaults(int faults){
-
+void AS6212::setConsecutiveFaults(int faults)
+{
   if ((faults > 4) || (faults < 1)) 
   {
      // discard out of range fault values
@@ -248,33 +250,205 @@ void AS6212::setConsecutiveFaults(int faults){
     bool configBit_11 = bitRead(faults, 0);
     bool configBit_12 = bitRead(faults, 1);
 
-    bitWrite(configReg, 11, configBit_11);
-    bitWrite(configReg, 12, configBit_12);
+    bitWrite(configReg, AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_0, configBit_11);
+    bitWrite(configReg, AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_1, configBit_12);
 
     setConfig(configReg);
   }
 }
 
-/* readInterruptMode
-* returns the interrupt mode bit status as a boolean
+/* getConsecutiveFaults
+*  gets the number of fault that need to happen in a row before alert is changed
+*  valid settings are 1,2,3 or 4, but these correspont to other bit values
+*  in the configuration register bits 11 and 12.
 */
 
-bool AS6212::readInterruptMode(){
-    uint16_t configReg = readRegister(CONFIG,2);
-    return bitRead(configReg, 9);		
+uint8_t AS6212::getConsecutiveFaults()
+{
+  int faults;
+
+  uint16_t configReg = readRegister(CONFIG,2);
+
+  bool consecutiveFaultsBit_0 = bitRead(configReg, AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_0);
+  bool consecutiveFaultsBit_1 = bitRead(configReg, AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_1);
+
+  bitWrite(faults, 0, consecutiveFaultsBit_0);
+  bitWrite(faults, 1, consecutiveFaultsBit_1);
+
+  faults = faults + 1; // consecutive faults value is stored in just 2 bits in the config reg,
+  // so we must convert from stored values (0-3) to "human readable" values (1-4).
+
+  return faults;
 }
 
 /* setInterruptMode
 *  sets the interrupt mode bits in the config register
+*  
+*  Valid options are:
+*  AS6212_MODE_COMPARATOR
+*  AS6212_MODE_INTERRUPT
 */
 
-void AS6212::setInterruptMode(bool mode){
+void AS6212::setInterruptMode(bool mode)
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    bitWrite(configReg, AS6212_CONFIG_BIT_INTERRUPT_MODE, mode);
+    setConfig(configReg);
+}
 
+/* getInterruptMode
+* returns the interrupt mode bit status as a boolean
+*/
+
+bool AS6212::getInterruptMode()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    return bitRead(configReg, AS6212_CONFIG_BIT_INTERRUPT_MODE);		
+}
+
+/* setConversionCycleTime
+*  sets the conversion cylce time (aka convertion rate) in the config register
+*  valid settings are:
+*
+*  AS6212_CONVERSION_CYCLE_TIME_125MS
+*  AS6212_CONVERSION_CYCLE_TIME_250MS
+*  AS6212_CONVERSION_CYCLE_TIME_1000MS
+*  AS6212_CONVERSION_CYCLE_TIME_4000MS
+*/
+
+void AS6212::setConversionCycleTime(uint8_t cycleTime)
+{
+  if ((cycleTime > 3) || (cycleTime < 0)) 
+  {
+     // discard out of range values
+  } 
+  else
+  {
     uint16_t configReg = readRegister(CONFIG,2);
 
-    bitWrite(configReg, 9, mode);
+    bool configBit_6 = bitRead(cycleTime, 0);
+    bool configBit_7 = bitRead(cycleTime, 1);
+
+    bitWrite(configReg, AS6212_CONFIG_BIT_CONVERSION_RATE_0, configBit_6);
+    bitWrite(configReg, AS6212_CONFIG_BIT_CONVERSION_RATE_1, configBit_7);
 
     setConfig(configReg);
+  }
+}
+
+/* getConversionCycleTime
+*  gets the conversion cylce time (aka convertion rate) in the config register
+*  returns the cycle time value as milliseconds: (125/250/1000/4000)
+*/
+
+uint16_t AS6212::getConversionCycleTime()
+{
+  int cycleTime;
+
+  uint16_t configReg = readRegister(CONFIG,2);
+
+  bool conversionRateBit_0 = bitRead(configReg, AS6212_CONFIG_BIT_CONVERSION_RATE_0);
+  bool conversionRateBit_1 = bitRead(configReg, AS6212_CONFIG_BIT_CONVERSION_RATE_1);
+
+  bitWrite(cycleTime, 0, conversionRateBit_0);
+  bitWrite(cycleTime, 1, conversionRateBit_1);
+
+  // conversion rate value is stored in just 2 bits in the config reg,
+  // so we must convert from stored values (0-3) to "human readable" values (125/250/1000/4000).
+  if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_125MS) return 125;
+  if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_250MS) return 250;
+  if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_1000MS) return 1000;
+  if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_4000MS) return 4000;
+}
+
+/* setAlertPolarity
+*  sets the alert polarity bit in the config register
+
+The polarity bit configures the polarity of the ALERT output. If the polarity bit is cleared, the ALERT
+output is low active while it becomes high active if the polarity bit is set to ‘1’.
+
+*/
+
+void AS6212::setAlertPolarity(bool polarity)
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    bitWrite(configReg, AS6212_CONFIG_BIT_ALERT_POL, polarity);
+    setConfig(configReg);
+}
+
+/* getAlertPolarity
+* returns the alert polarity bit status as a boolean
+*/
+
+bool AS6212::getAlertPolarity()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    return bitRead(configReg, AS6212_CONFIG_BIT_ALERT_POL);		
+}
+
+/* sleepModeOn
+*  sets the sleep mode bit in the config register
+*  This can take 120ms + a conversion time (around 150ms total)
+*  Note, this also triggers a SS conversion as recommended at DS section 6.2.4
+*/
+
+void AS6212::sleepModeOn()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    bitWrite(configReg, AS6212_CONFIG_BIT_SLEEP_MODE, 1);
+    bitWrite(configReg, AS6212_CONFIG_BIT_SINGLE_SHOT, 1); // trigger SS
+    setConfig(configReg);
+}
+
+/* sleepModeOff
+*  clears the sleep mode bit in the config register
+*  Note, after reseting the SM bit to 0,
+*  the device enters the continuous conversion mode.
+*/
+
+void AS6212::sleepModeOff()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    bitWrite(configReg, AS6212_CONFIG_BIT_SLEEP_MODE, 0);
+    setConfig(configReg);
+}
+
+/* getSleepMode
+* returns the sleep mode bit status as a boolean
+*/
+
+bool AS6212::getSleepMode()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    return bitRead(configReg, AS6212_CONFIG_BIT_SLEEP_MODE);		
+}
+
+/* triggerSingleShotConversion
+*  sets the SS mode bit in the config register
+*  Note, you must be in sleep mode for this to work
+*/
+
+void AS6212::triggerSingleShotConversion()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    // only do this, if we are in sleep mode
+    if (bitRead(configReg, AS6212_CONFIG_BIT_SLEEP_MODE) == true)
+    {
+      bitWrite(configReg, AS6212_CONFIG_BIT_SINGLE_SHOT, 1); // trigger SS
+      setConfig(configReg);
+    }
+}
+
+/* getSingleShotStatus
+*  returns the SS mode bit status as a boolean
+*  0 = No conversion ongoing/ conversion finished
+*  1 = Start single shot conversion / conversion ongoing
+*/
+
+bool AS6212::getSingleShotStatus()
+{
+    uint16_t configReg = readRegister(CONFIG,2);
+    return bitRead(configReg, AS6212_CONFIG_BIT_SINGLE_SHOT);		
 }
 
 float AS6212::C_to_F(float tempC)

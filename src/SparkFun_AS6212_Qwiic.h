@@ -31,6 +31,29 @@
 #include <Arduino.h>
 #include "registers/AS6212_Registers.h"
 
+#define AS6212_CONFIG_BIT_ALERT 5
+#define AS6212_CONFIG_BIT_CONVERSION_RATE_0 6
+#define AS6212_CONFIG_BIT_CONVERSION_RATE_1 7
+#define AS6212_CONFIG_BIT_SLEEP_MODE 8
+#define AS6212_CONFIG_BIT_INTERRUPT_MODE 9
+#define AS6212_CONFIG_BIT_ALERT_POL 10
+#define AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_0 11
+#define AS6212_CONFIG_BIT_CONSECUTIVE_FAULTS_1 12
+#define AS6212_CONFIG_BIT_SINGLE_SHOT 15
+
+#define AS6212_MODE_COMPARATOR 0
+#define AS6212_MODE_INTERRUPT 1
+
+#define AS6212_CONVERSION_CYCLE_TIME_125MS 3
+#define AS6212_CONVERSION_CYCLE_TIME_250MS 2
+#define AS6212_CONVERSION_CYCLE_TIME_1000MS 1
+#define AS6212_CONVERSION_CYCLE_TIME_4000MS 0
+
+#define AS6212_ALERT_ACTIVE_HIGH 1
+#define AS6212_ALERT_ACTIVE_LOW 0
+
+
+
 struct{
 	uint8_t tlow_err_flag;
 	uint8_t thigh_err_flag;
@@ -63,10 +86,28 @@ class AS6212{
     // Config settings functions
     uint16_t readConfig();
     void setConfig(uint16_t targetState);
-    bool readAlert();
-    void setConsecutiveFaults(int faults);
-    bool readInterruptMode();
+
+    bool getAlertStatus();
+
+    void setConsecutiveFaults(int faults); // valid options are 1, 2, 3 or 4
+    uint8_t getConsecutiveFaults();
+
     void setInterruptMode(bool mode);
+    bool getInterruptMode();
+
+    void setConversionCycleTime(uint8_t cycleTime = AS6212_CONVERSION_CYCLE_TIME_250MS);
+    uint16_t getConversionCycleTime(); // returns milliseconds (125/250/1000/4000)
+
+    void setAlertPolarity(bool polarity);
+    bool getAlertPolarity();
+
+    void sleepModeOn();
+    void sleepModeOff();
+    bool getSleepMode();
+
+    void triggerSingleShotConversion();
+    bool getSingleShotStatus();
+
   private:
     TwoWire *_i2cPort = NULL;
     uint8_t _deviceAddress;
@@ -76,7 +117,6 @@ class AS6212{
     float F_to_C(float tempF);
 };
 
-#define AS6212_MODE_COMPARATOR 0
-#define AS6212_MODE_INTERRUPT 1
+
 
 #endif
