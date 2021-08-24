@@ -10,8 +10,14 @@
   Then puts the sensor to sleep for 5 seconds.
   Then wakes it up and takes another reading.
   Then loops this cycle forever.
-
   The readings are printed to the terminal at 115200 baud.
+
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
 
   Note, this example uses default settings on the sensor, 
   So when it is woken, it's in continous reading mode.

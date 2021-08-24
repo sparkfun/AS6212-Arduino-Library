@@ -8,6 +8,13 @@
 
   This example shows how to change the interrupt mode. (aka "alert mode").
 
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
+
   The default interrupt mode is AS6212_MODE_COMPARATOR, but for this example
   we are going to try out AS6212_MODE_INTERRUPT.
 

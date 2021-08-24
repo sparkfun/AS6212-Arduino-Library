@@ -8,8 +8,14 @@
 
   This example puts the sensor into sleep mode.
   Then it takes a single shot reading every 5 seconds.
-
   The readings are printed to the terminal at 115200 baud.
+
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
 
   Note, using single shot readings, this is the lowest power
   option for the sensor, because most of the time it is asleep,

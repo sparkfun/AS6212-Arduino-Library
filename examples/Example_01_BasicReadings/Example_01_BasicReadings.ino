@@ -9,6 +9,13 @@
   This example reads temperature from the sensor 
   and prints it to the terminal at 115200 baud.
 
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
+  
   Note, there are separate functions to read in Celcius
   or Fahrenheit.
 

@@ -1,39 +1,33 @@
 /******************************************************************************
-  Example_07_ConsecutiveFaults.ino
+  Example_10_HardwareInterrupt.ino
   Example for the SparkFun Digital Temperature Sensor Breakout - AS6212 (Qwiic)
   License: This code is public domain but you buy us a beer if you use this and we meet someday (Beerware license).
   Authors: SparkFun Electronics, Pete Lewis, Brandon Williams
   Date Created: 8/17/2021
   ~
 
-  This Example demonstrates how to set up a useful alert by controlling
-  the Consecutive Faults and the conversion cycle time.
+  This example shows how to use a hardware interrupt.
 
   Connections:
+  
   --------------------------
   Arduino   |     Sensor
   --------------------------
-  Qwiic    -->>   Qwiic
-  --------------------------
   
-  Note, we will also set up alert threshholds.
+  Qwiic    -->>   Qwiic
+  Pin 2    -->>   "ALRT/AD1"
 
-  With all this we can do a useful example where we require the temperature to
-  rise above a high threshhold for 4 readings. And the sensor will only take
-  a reading every 4 seconds. This means that the temperature must rise above 80F 
-  for 16 seconds to cause an active alert.
+  --------------------------
 
-  Note, for the alert status to become INactive,
-  the temp must drop below the low threshhold for 16 seconds!
+  The default interrupt mode is AS6212_MODE_COMPARATOR, but for this example
+  we are going to try out AS6212_MODE_INTERRUPT.
 
-  Also note, because we are reading/printing the temp every second,
-  and the conversion cycle time is set to 4 seconds,
-  This means that the readings will only update every 4 readings.
+  In interrupt mode, the alertStatus and Alert pin will become active quickly
+  when the temp crosses the high threshold.
 
-  By adjusting the conversion cycle time and the consecutive faults,
-  You can create many different alert setups to suit your project's needs.
+  It will then only go active quickly again if the temp crosses the low threshhold.
 
-  Note the alertStatus and the Alert output pin on the board are always the same.
+  Note, the alert status and the alert pin on the board will read the same thing.
 
   Big thanks to Brandon Williams. This library was based off his
   original library created 07/15/2020 and can be found here:
@@ -57,16 +51,19 @@
 AS6212 sensor;
 
 //Initialize temperature variables as floats
-float tempC;
 float tempF;
 
-bool alertStatus;
+bool ledState = LOW;  // ledState used to set the LED
+
+bool alertInterrupt;  // this is used to know if an hardware interrupt has happened
+                      // ISR (aka interrupt service routine)
 
 void setup() {
+  attachInterrupt(digitalPinToInterrupt(2), ISR_alert, FALLING);
 
   Serial.begin(115200);
 
-  Serial.println("SparkFun AS6212 Qwiic Example 7 - CConsecutive Faults");
+  Serial.println("SparkFun AS6212 Qwiic Example 8 - Hardware Interrupt");
 
   Wire.begin();
 
@@ -98,31 +95,36 @@ void setup() {
   Serial.print("\tTlowF: ");
   Serial.println(sensor.getTLowF(), 2);
 
-  sensor.setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_4000MS); // 1 time every 4 seconds
+  // Mostly default settings here, except AS6212_MODE_INTERRUPT
+  sensor.setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_250MS); // 4 times a sec
+  sensor.setConsecutiveFaults(1); // valid options are 1,2,3 or 4.
+  sensor.setAlertPolarity(AS6212_ALERT_ACTIVE_LOW);
 
-  // other options are as follows:
-  // sensor.setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_125MS); // 8 times a sec
-  // sensor.setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_250MS); // 4 times a sec
-  // sensor.setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_1000MS); // 4 times a sec
+  sensor.setInterruptMode(AS6212_MODE_INTERRUPT);
+  //sensor.setInterruptMode(AS6212_MODE_COMPARATOR); // other valid mode option
 
-  sensor.setConsecutiveFaults(4); // valid options are 1,2,3 or 4.
+  pinMode(LED_BUILTIN, OUTPUT); // used to show sketch is alive
 }
 
 void loop() {
-  tempF = sensor.readTempF();
-  Serial.print("Temperature (°F): ");
-  Serial.print(tempF, 6);              //Reads out 6 characters of the temperature float
-
-  alertStatus = sensor.getAlertStatus();
-
-  Serial.print("\talertStatus: ");
-  Serial.print(alertStatus);
-
-  if (alertStatus == false) // be default alertStatus is active low
+  if (alertInterrupt == true) // alertInterrupt is only set via hardware interrupt
   {
-    Serial.print("\tAlert ACTIVE LOW!");
+    tempF = sensor.readTempF();
+    Serial.println("Alert ACTIVE LOW!");
+    Serial.print("Temperature (°F): ");
+    Serial.println(tempF, 6);              //Reads out 6 characters of the temperature float
+    alertInterrupt = false; // reset int variable
   }
 
-  Serial.println();
-  delay(1000);
+  ledState = !ledState; // flip it and rip it brah.
+  digitalWrite(LED_BUILTIN, ledState);
+  delay(500); // we can use delays now, 
+              // because we're using a hardware interrupt to catch the alert pin.
+              // However, we do want to keep it quick, so out sketch is reactive.
 }
+
+void ISR_alert()
+{
+  alertInterrupt = true;
+}
+

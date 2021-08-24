@@ -8,6 +8,14 @@
 
   This example utilizes the alert feature of the temp sensor.
   (aka the interrupt feature).
+
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
+    
   We will setup the temp sensor to watch for a high and low threshhold.
   Then the Alert will go ACTIVE LOW when we cross the uppder threshhold.
   We can cause this effect be breathing on the sensor.

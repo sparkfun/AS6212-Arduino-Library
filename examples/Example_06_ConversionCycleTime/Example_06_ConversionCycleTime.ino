@@ -8,6 +8,13 @@
 
   This Example demonstrates how to set the Conversion Cycle Time.
 
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
+  
   We will utilize this funtion: setConversionCycleTime(uint8_t cycleTime)
   valid options are:
 

@@ -9,6 +9,13 @@
   This example reads temperature from the sensor using a different I2C address
   and prints it to the terminal at 115200 baud.
 
+  Connections:
+  --------------------------
+  Arduino   |     Sensor
+  --------------------------
+  Qwiic    -->>   Qwiic
+  --------------------------
+
   Note, the I2C address can be set to a variety of addresses using the 4 address jumpers.
 
   In this example we are trying out 0x4A.
