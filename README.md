@@ -1,4 +1,9 @@
 # AS6212-Arduino-Library
+===========================================================
+[![SparkFun Digital Temperature Sensor Breakout - AS6212 (QWiic)](https://cdn.sparkfun.com/assets/parts/1/7/9/7/0/18521-SparkFun_Digital_Temperature_Sensor_Breakout_-_AS6212__Qwiic_-01.jpg)](https://www.sparkfun.com/products/18521) 
+
+[*Digital Temperature Sensor Breakout - AS6212 (Qwiic)](https://www.sparkfun.com/products/18521)
+
 Arduino Software repository for the AMS AS6212 Temperature Sensor
 
 ### AMS AS6212 Temperature Sensor
@@ -8,8 +13,10 @@ The highest performing AS6212 has an accuracy of +/- 0.2°C from -10°C to 65 °
 
 Documentation
 --------------
-* **[Main Repository](https://github.com/will2055/AS6212-Temperature-Sensor-Breakout)** - Main repository (including hardware files) for the temperature sensor.
-* **[Arduino Library]()** - Repository containing the Arduino library software to interface with this sensor.
+* **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
+* **[Product Repository](https://github.com/will2055/AS6212-Temperature-Sensor-Breakout)** - Main repository (including hardware files) for the temperature sensor.
+
+
 
 License Information
 -------------------
