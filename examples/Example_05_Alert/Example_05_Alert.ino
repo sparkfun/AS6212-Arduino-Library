@@ -51,7 +51,7 @@
   Distributed as-is; no warranty is given.
 ******************************************************************************/
 
-#include "SparkFun_AS6212_Qwiic.h"
+#include "SparkFun_AS6212_Qwiic.h"  //Click here to get the library: http://librarymanager/All#SparkFun_AS6212
 #include <Wire.h>
 
 AS6212 sensor;
