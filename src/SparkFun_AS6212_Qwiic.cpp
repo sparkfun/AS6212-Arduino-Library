@@ -154,8 +154,7 @@ float AS6212::getTLowF()
 
 /*
  * Sets TLow Threshold, if temp drops below the threshold then 
- * interrupt is triggered. Pointer to error flag to for custom
- * error reporting.
+ * interrupt is triggered.
  */
 bool AS6212::setTLowC(int16_t lowLimit)
 {        
@@ -461,4 +460,25 @@ float AS6212::F_to_C(float tempF)
   return ( (tempF - 32.0) * (5.0 / 9.0) );
 }
 
-//Sleep Single-Shot mode (0xC1A0) returns odd register value (FFFFC1A0)
+/* setDefaultSettings
+*  Sets up the sensor with the following default settings:
+*
+*  Sleep Mode: OFF
+*  Conversion Rate (aka Conversion cycletime): 250MS (aka 4 per second)
+*  Interrupt Mode: COMPARATOR
+*  Alert Polarity: ACTIVE LOW
+*  Consecutive Faults: 1
+*  TLOW: 75C
+*  THIGH: 80C
+*/
+
+void AS6212::setDefaultSettings()
+{
+  sleepModeOff();
+  setConversionCycleTime(AS6212_CONVERSION_CYCLE_TIME_250MS);
+  setInterruptMode(AS6212_MODE_COMPARATOR);
+  setAlertPolarity(AS6212_ALERT_ACTIVE_LOW);
+  setConsecutiveFaults(1);
+  setTLowC(75);
+  setTHighC(80);
+}

@@ -46,6 +46,7 @@ sleepModeOff	KEYWORD2
 getSleepMode	KEYWORD2
 triggerSingleShotConversion	KEYWORD2
 getSingleShotStatus	KEYWORD2
+setDefaultSettings	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

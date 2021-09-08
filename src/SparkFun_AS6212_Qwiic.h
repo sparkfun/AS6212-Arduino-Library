@@ -52,13 +52,6 @@
 #define AS6212_ALERT_ACTIVE_HIGH 1
 #define AS6212_ALERT_ACTIVE_LOW 0
 
-
-
-struct{
-	uint8_t tlow_err_flag;
-	uint8_t thigh_err_flag;
-}ERROR_FLAGS;
-
 class AS6212{
   public:
     AS6212();
@@ -108,6 +101,8 @@ class AS6212{
     void triggerSingleShotConversion();
     bool getSingleShotStatus();
 
+    void setDefaultSettings();
+
   private:
     TwoWire *_i2cPort = NULL;
     uint8_t _deviceAddress;
@@ -116,7 +111,4 @@ class AS6212{
     float C_to_F(float tempC);
     float F_to_C(float tempF);
 };
-
-
-
 #endif

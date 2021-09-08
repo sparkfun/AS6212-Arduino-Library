@@ -86,6 +86,9 @@ void setup() {
     delay(150); // wait for it to wake up
   }
 
+  sensor.setDefaultSettings(); // return to default settings 
+                               // in case they were set differenctly by a previous example
+
   sensor.setTHighF(80); // set high threshhold
   sensor.setTLowF(77); // set low threshhold
 

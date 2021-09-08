@@ -83,8 +83,8 @@ void loop(){
 
   Serial.println();
   Serial.print("Temperature (°C): ");
-  Serial.println(tempC, 6);							//Reads out 6 characters of the temperature float
-  Serial.print("Temperature (°F): ");
+  Serial.print(tempC, 6);							//Reads out 6 characters of the temperature float
+  Serial.print("\tTemperature (°F): ");
   Serial.println(tempF, 6);							//Reads out 6 characters of the temperature float
   
   sensor.sleepModeOn(); // go to sleep, this can take ~150ms
