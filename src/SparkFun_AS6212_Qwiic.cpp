@@ -358,6 +358,7 @@ uint16_t AS6212::getConversionCycleTime()
   if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_250MS) return 250;
   if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_1000MS) return 1000;
   if(cycleTime == AS6212_CONVERSION_CYCLE_TIME_4000MS) return 4000;
+  return 0; // gotta return something to avoid compiler error
 }
 
 /* setAlertPolarity
